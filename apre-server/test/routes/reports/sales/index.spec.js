@@ -143,3 +143,68 @@ describe('Apre Sales Report API - Sales by Region', () => {
     });
   });
 });
+
+// M-064: Test the monthly sales report API
+describe('Apre Sales Report API - Monthly Sales', () => {
+  beforeEach(() => {
+    mongo.mockClear();
+  });
+
+  // Verify the endpoint returns success with monthly sales records
+  it('should fetch monthly sales data grouped by month', async () => {
+    mongo.mockImplementation(async (callback) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue([
+            { month: 1, totalSales: 10000 },
+            { month: 2, totalSales: 15000 }
+          ])
+        })
+      };
+      await callback(db);
+    });
+
+    const response = await request(app).get('/api/reports/sales/monthly-sales');
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toEqual([
+      { month: 1, totalSales: 10000 },
+      { month: 2, totalSales: 15000 }
+    ]);
+    expect(response.body[0]).toHaveProperty('month');
+    expect(response.body[0]).toHaveProperty('totalSales');
+  });
+
+  // Verify the endpoint returns an empty array when no sales data exists
+  it('should return 200 with an empty array if no monthly sales data is found', async () => {
+    mongo.mockImplementation(async (callback) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue([])
+        })
+      };
+      await callback(db);
+    });
+
+    const response = await request(app).get('/api/reports/sales/monthly-sales');
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toEqual([]);
+  });
+
+  // Verify invalid paths return a 404 error response
+  it('should return 404 for an invalid endpoint', async () => {
+    const response = await request(app).get('/api/reports/sales/monthly-sales-invalid');
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      message: 'Not Found',
+      status: 404,
+      type: 'error'
+    });
+  });
+});

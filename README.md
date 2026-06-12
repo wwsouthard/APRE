@@ -20,7 +20,7 @@ apre/
 - **Authentication** — Sign in with username and password; session stored in cookies; route guard protects authenticated pages
 - **Dashboard** — Bar, line, pie, and doughnut charts plus an agent feedback table, all driven by API data
 - **Reports**
-  - **Sales** — Sales by region (chart and tabular views)
+  - **Sales** — Sales by region (chart and tabular views), monthly sales totals by calendar month
   - **Agent performance** — Call duration by date range
   - **Customer feedback** — Channel rating by month
 - **User management** (admin role) — List, create, view, update, and delete users
@@ -94,6 +94,7 @@ All routes are prefixed with `/api`.
 | `GET` | `/dashboard/agent-feedback` | Agent call duration and feedback |
 | `GET` | `/reports/sales/regions` | Distinct sales regions |
 | `GET` | `/reports/sales/regions/:region` | Sales for a region |
+| `GET` | `/reports/sales/monthly-sales` | Monthly sales totals grouped by calendar month |
 | `GET` | `/reports/agent-performance/call-duration-by-date-range` | Call duration report |
 | `GET` | `/reports/customer-feedback/channel-rating-by-month` | Channel ratings by month |
 
@@ -110,8 +111,81 @@ All routes are prefixed with `/api`.
 | `/user-management/users/:id` | Admin | User details |
 | `/reports/sales/sales-by-region` | Authenticated | Sales by region chart |
 | `/reports/sales/sales-by-region-tabular` | Authenticated | Sales by region table |
+| `/reports/sales/monthly-sales` | Authenticated | Monthly sales table |
 | `/reports/agent-performance/call-duration-by-date-range` | Authenticated | Call duration report |
 | `/reports/customer-feedback/channel-rating-by-month` | Authenticated | Channel rating report |
+
+## Week 2 Development Task (M-064)
+
+| | |
+|---|---|
+| **Task ID** | `M-064` |
+| **Task Name** | Monthly Sales Report |
+
+### Feature description
+
+The Monthly Sales Report aggregates sale amounts from the `sales` collection by calendar month and displays the results in a sortable table. The Express API returns an array of records, each containing a `month` number (1–12) and a `totalSales` sum. The Angular client loads this data on page init via `MonthlySalesService` and renders it using the shared `TableComponent`.
+
+**Server files:** `apre-server/src/routes/reports/sales/index.js`, `apre-server/test/routes/reports/sales/index.spec.js`
+
+**Client files:** `apre-client/src/app/reports/sales/monthly-sales/`
+
+### API endpoint
+
+```
+GET /api/reports/sales/monthly-sales
+```
+
+**Example response:**
+
+```json
+[
+  { "month": 1, "totalSales": 10000 },
+  { "month": 2, "totalSales": 15000 }
+]
+```
+
+Verify the endpoint manually:
+
+```bash
+curl http://localhost:3000/api/reports/sales/monthly-sales
+```
+
+### Run instructions
+
+Start the API server and Angular client in separate terminals (see [Getting started](#getting-started) above), then sign in and navigate to **Sales Reports → Monthly Sales** in the side menu, or open http://localhost:4200/reports/sales/monthly-sales directly.
+
+### Server test instructions
+
+Run all server tests:
+
+```bash
+cd apre-server
+npm test
+```
+
+Run only the sales report tests (includes M-064 monthly sales tests):
+
+```bash
+cd apre-server
+npm test -- test/routes/reports/sales/index.spec.js
+```
+
+### Client test instructions
+
+Run all client tests:
+
+```bash
+cd apre-client
+npm test
+```
+
+Run only the monthly sales component tests:
+
+```bash
+cd apre-client
+npx ng test --no-watch --browsers=Firefox --include='**/monthly-sales.component.spec.ts'
+```
 
 ## Testing
 

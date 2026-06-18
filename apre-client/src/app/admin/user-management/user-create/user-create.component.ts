@@ -41,11 +41,11 @@ import { environment } from '../../../../environments/environment';
         </div>
 
         <div class="form__actions">
+          <!-- Week 3 minor task: replaces the Return link with a clearer Cancel button next to Submit for better form UX. -->
+          <button type="button" class="button button--secondary" routerLink="/user-management/users">Cancel</button>
           <input type="submit" class="button button--primary" value="Submit">
         </div>
       </form>
-      <br />
-      <a class="link link--secondary" routerLink="/user-management/users">Return</a>
     </div>
   `,
   styles: ``

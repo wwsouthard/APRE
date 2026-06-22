@@ -73,3 +73,85 @@ describe('Apre Agent Performance API', () => {
     });
   });
 });
+
+// M-085: Test the agent performance by month report API
+describe('Apre Agent Performance API - Performance By Month', () => {
+  beforeEach(() => {
+    mongo.mockClear();
+  });
+
+  // Verify the endpoint returns agent performance rows for the requested month
+  it('should return agent performance data successfully', async () => {
+    mongo.mockImplementation(async (callback) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue([
+            { agent: 'Agent A', averagePerformance: 4.5 },
+            { agent: 'Agent B', averagePerformance: 3.8 }
+          ])
+        })
+      };
+      await callback(db);
+    });
+
+    const response = await request(app).get('/api/reports/agent-performance/performance-by-month?month=1');
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toEqual([
+      { agent: 'Agent A', averagePerformance: 4.5 },
+      { agent: 'Agent B', averagePerformance: 3.8 }
+    ]);
+    expect(response.body[0]).toHaveProperty('agent');
+    expect(response.body[0]).toHaveProperty('averagePerformance');
+  });
+
+  // Verify the endpoint returns an empty array when no records match the month
+  it('should return an empty array when no agent performance records exist', async () => {
+    mongo.mockImplementation(async (callback) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue([])
+        })
+      };
+      await callback(db);
+    });
+
+    const response = await request(app).get('/api/reports/agent-performance/performance-by-month?month=6');
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toEqual([]);
+  });
+
+  // Verify database failures are passed to the error handler and return a 500 response
+  it('should handle database or service errors gracefully', async () => {
+    mongo.mockImplementation(async (callback, next) => {
+      const db = {
+        collection: jest.fn().mockReturnThis(),
+        aggregate: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockRejectedValue(new Error('Database failure'))
+        })
+      };
+
+      try {
+        await callback(db);
+      } catch (err) {
+        const error = new Error('Error connecting to db ' + err);
+        error.status = 500;
+        next(error);
+      }
+    });
+
+    const response = await request(app).get('/api/reports/agent-performance/performance-by-month?month=1');
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual(expect.objectContaining({
+      type: 'error',
+      status: 500,
+      message: expect.stringContaining('Database failure')
+    }));
+  });
+});

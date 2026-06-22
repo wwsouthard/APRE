@@ -93,4 +93,87 @@ router.get('/call-duration-by-date-range', (req, res, next) => {
   }
 });
 
+/**
+ * @description
+ *
+ * GET /performance-by-month
+ *
+ * Fetches average agent performance metrics for a specified calendar month.
+ * Returns a row array suitable for display in an Angular TableComponent, with
+ * each record containing the agent name and average performance score.
+ *
+ * Example:
+ * fetch('/performance-by-month?month=1')
+ *  .then(response => response.json())
+ *  .then(data => console.log(data));
+ */
+router.get('/performance-by-month', (req, res, next) => {
+  try {
+    const { month } = req.query;
+
+    if (!month) {
+      return next(createError(400, 'month is required'));
+    }
+
+    console.log('Fetching agent performance report for month:', month);
+
+    mongo(async db => {
+      // Aggregate agentPerformance records for the selected month and join agent names
+      const agentPerformanceByMonth = await db.collection('agentPerformance').aggregate([
+        {
+          // Normalize stored date values so $month can extract the calendar month
+          $addFields: {
+            date: { $toDate: '$date' }
+          }
+        },
+        {
+          // Limit results to records that fall within the requested month (1-12)
+          $match: {
+            $expr: {
+              $eq: [{ $month: '$date' }, Number(month)]
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: 'agents',
+            localField: 'agentId',
+            foreignField: 'agentId',
+            as: 'agentInfo'
+          }
+        },
+        {
+          $unwind: '$agentInfo'
+        },
+        {
+          // Average performance metric values per agent for the filtered month
+          $group: {
+            _id: '$agentInfo.name',
+            averagePerformance: {
+              $avg: {
+                $avg: '$performanceMetrics.value'
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            agent: '$_id',
+            averagePerformance: 1
+          }
+        },
+        {
+          $sort: { agent: 1 }
+        }
+      ]).toArray();
+
+      res.send(agentPerformanceByMonth);
+    }, next);
+  } catch (err) {
+    console.error('Error in /performance-by-month', err);
+    next(err);
+  }
+});
+
 module.exports = router;

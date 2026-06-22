@@ -187,6 +187,69 @@ cd apre-client
 npx ng test --no-watch --browsers=Firefox --include='**/monthly-sales.component.spec.ts'
 ```
 
+## Week 3 Major Development Task (M-085)
+
+| | |
+|---|---|
+| **Task ID** | `M-085` |
+| **Task Name** | Agent Performance Report API and Angular TableComponent display |
+| **Assignment** | WEB-450 Assignment 3.3 |
+
+### Feature description
+
+The Agent Performance by Month report lets users select a calendar month and view average performance scores per agent in a sortable table. The Express API aggregates records from the `agentPerformance` collection for the selected month and returns a row array suitable for `TableComponent`. The Angular client submits the month filter, maps the response to table rows, and handles empty or failed responses with user-facing messages.
+
+**Server files:** `apre-server/src/routes/reports/agent-performance/index.js`, `apre-server/test/routes/reports/agent-performance/index.spec.js`
+
+**Client files:** `apre-client/src/app/reports/agent-performance/performance-by-month/`
+
+### API endpoint
+
+```
+GET /api/reports/agent-performance/performance-by-month?month={1-12}
+```
+
+**Example response:**
+
+```json
+[
+  { "agent": "John Doe", "averagePerformance": 80 },
+  { "agent": "Mia Rodriguez", "averagePerformance": 70 }
+]
+```
+
+### Run instructions
+
+**Server:**
+
+```bash
+cd apre-server
+npm start
+```
+
+**Client:**
+
+```bash
+cd apre-client
+npm start
+```
+
+Sign in, then open **Agent Performance Reports → Agent Performance by Month** in the side menu, or go directly to http://localhost:4200/reports/agent-performance/performance-by-month.
+
+### Server test instructions
+
+```bash
+cd apre-server
+npm test -- test/routes/reports/agent-performance/index.spec.js
+```
+
+### Client test instructions
+
+```bash
+cd apre-client
+npx ng test --no-watch --browsers=Firefox --include='**/performance-by-month.component.spec.ts'
+```
+
 ## Testing
 
 **Server** (Jest):

@@ -1,3 +1,7 @@
+/**
+ * Assignment 4.1 (m-054): Pagination label now shows "Page X of Y" using
+ * currentPage and a derived totalPages getter so users see both position and range.
+ */
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -33,7 +37,8 @@ import { CommonModule } from '@angular/common';
       </table>
       <div class="pagination">
         <button class="button button--primary" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
-        <span class="pagination__info">Page {{ currentPage }}</span>
+        <!-- m-054: Show current page and total pages so users know where they are in the dataset -->
+        <span class="pagination__info">Page {{ currentPage }} of {{ totalPages }}</span>
         <button class="button button--primary" (click)="changePage(currentPage + 1)" [disabled]="currentPage * recordsPerPage >= data.length">Next</button>
       </div>
     </div>
@@ -133,6 +138,14 @@ export class TableComponent implements OnInit, OnChanges {
     const start = (this.currentPage - 1) * this.recordsPerPage;
     const end = start + this.recordsPerPage;
     return this.data.slice(start, end);
+  }
+
+  /**
+   * m-054: Total page count derived from row count and recordsPerPage.
+   * Reuses existing inputs/state; updates automatically when data or page size changes.
+   */
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.data.length / this.recordsPerPage));
   }
 
   sortData(column: string) {

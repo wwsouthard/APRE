@@ -1,9 +1,12 @@
-/**
- * Author: Professor Krasso
- * Modified by: GitHub Copilot
- * Date: 8/8/2024
- * File: main-layout.component.ts
- * Description: Main layout of the MEAN Stack Application
+/*
+ * Author: Will Southard
+ * Course: WEB 450 - Mastering the MEAN Stack
+ * Assignment: Week 4 Major Development Task
+ * Task: M-106 - Customer Feedback By Year Report
+ * Date: June 28, 2026
+ *
+ * Description:
+ * This file was updated to support the customer feedback by year report component.
  */
 import { Component } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
@@ -318,7 +321,8 @@ export class MainLayoutComponent {
   ];
 
   customerFeedbackReports = [
-    { name: 'Channel Rating by Month', url: '/reports/customer-feedback/channel-rating-by-month' }
+    { name: 'Channel Rating by Month', url: '/reports/customer-feedback/channel-rating-by-month' },
+    { name: 'Customer Feedback by Year', url: '/reports/customer-feedback/feedback-by-year' }
     // Add more reports as needed
   ];
 

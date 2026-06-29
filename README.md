@@ -22,7 +22,7 @@ apre/
 - **Reports**
   - **Sales** — Sales by region (chart and tabular views), monthly sales totals by calendar month
   - **Agent performance** — Call duration by date range
-  - **Customer feedback** — Channel rating by month
+  - **Customer feedback** — Channel rating by month, customer feedback by year
 - **User management** (admin role) — List, create, view, update, and delete users
 - **Support & FAQ** — Static help content describing the data model and collections
 
@@ -97,6 +97,7 @@ All routes are prefixed with `/api`.
 | `GET` | `/reports/sales/monthly-sales` | Monthly sales totals grouped by calendar month |
 | `GET` | `/reports/agent-performance/call-duration-by-date-range` | Call duration report |
 | `GET` | `/reports/customer-feedback/channel-rating-by-month` | Channel ratings by month |
+| `GET` | `/reports/customer-feedback/feedback-by-year` | Customer feedback averages by month for a year |
 
 ## Client routes
 
@@ -114,6 +115,7 @@ All routes are prefixed with `/api`.
 | `/reports/sales/monthly-sales` | Authenticated | Monthly sales table |
 | `/reports/agent-performance/call-duration-by-date-range` | Authenticated | Call duration report |
 | `/reports/customer-feedback/channel-rating-by-month` | Authenticated | Channel rating report |
+| `/reports/customer-feedback/feedback-by-year` | Authenticated | Customer feedback by year table |
 
 ## Week 2 Development Task (M-064)
 
@@ -249,6 +251,113 @@ npm test -- test/routes/reports/agent-performance/index.spec.js
 cd apre-client
 npx ng test --no-watch --browsers=Firefox --include='**/performance-by-month.component.spec.ts'
 ```
+
+## Week 4 Major Development Task (M-106)
+
+| | |
+|---|---|
+| **Task ID** | `M-106` |
+| **Task Name** | Create an API to fetch customer feedback data by year and build an Angular component to display the data |
+| **Assignment** | WEB-450 Assignment 4.3 |
+| **Commit** | `TBD` *(update after final commit)* |
+
+### Server API summary
+
+The Customer Feedback by Year API filters records from the `customerFeedback` collection by calendar year and returns average ratings grouped by month. The endpoint validates the required `year` query parameter and rejects non-four-digit values with a `400` response. An empty result set returns `200` with an empty array.
+
+**Server files:** `apre-server/src/routes/reports/customer-feedback/index.js`, `apre-server/test/routes/reports/customer-feedback/index.spec.js`
+
+```
+GET /api/reports/customer-feedback/feedback-by-year?year={YYYY}
+```
+
+**Example response:**
+
+```json
+[
+  { "month": 1, "averageRating": 4.5 },
+  { "month": 2, "averageRating": 3.8 }
+]
+```
+
+Verify the endpoint manually:
+
+```bash
+curl "http://localhost:3000/api/reports/customer-feedback/feedback-by-year?year=2024"
+```
+
+### Angular component summary
+
+The `FeedbackByYearComponent` lets users enter a four-digit year, calls the API on submit, and displays monthly average ratings in the shared `TableComponent`. The component handles form validation, empty results, and API errors with user-facing messages.
+
+**Client files:** `apre-client/src/app/reports/customer-feedback/feedback-by-year/`
+
+### Setup and run instructions
+
+Start the API server and Angular client in separate terminals (see [Getting started](#getting-started) above), sign in, then open **Customer Feedback Reports → Customer Feedback by Year** in the side menu.
+
+**Server:**
+
+```bash
+cd apre-server
+npm start
+```
+
+**Client:**
+
+```bash
+cd apre-client
+npm start
+```
+
+**Report URL:** http://localhost:4200/reports/customer-feedback/feedback-by-year
+
+### Server test instructions
+
+```bash
+cd apre-server
+npm test -- test/routes/reports/customer-feedback/index.spec.js
+```
+
+**Expected result:**
+
+```
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+```
+
+*(Includes 4 M-106 feedback-by-year tests: valid year, empty result, missing year, invalid year.)*
+
+### Client test instructions
+
+```bash
+cd apre-client
+npx ng test --no-watch --browsers=Firefox --include='**/feedback-by-year.component.spec.ts'
+```
+
+**Expected result:**
+
+```
+TOTAL: 5 SUCCESS
+```
+
+### Manual verification
+
+1. Confirm the API returns data for a valid year:
+   ```bash
+   curl "http://localhost:3000/api/reports/customer-feedback/feedback-by-year?year=2024"
+   ```
+2. Confirm missing or invalid year returns `400`:
+   ```bash
+   curl "http://localhost:3000/api/reports/customer-feedback/feedback-by-year"
+   curl "http://localhost:3000/api/reports/customer-feedback/feedback-by-year?year=abcd"
+   ```
+3. Sign in at http://localhost:4200/signin.
+4. Navigate to **Customer Feedback Reports → Customer Feedback by Year**.
+5. Enter a four-digit year (e.g. `2024`) and click **Submit**.
+6. Verify the table shows **Month** and **Average Rating** columns with sortable data.
+7. Submit a year with no data and confirm the empty-state message appears.
+8. Submit without a year and confirm the validation message appears.
 
 ## Testing
 

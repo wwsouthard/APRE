@@ -1,8 +1,12 @@
-/**
- * Author: Professor Krasso
- * Date: 8/8/2024
- * File: app.routes.ts
- * Description: Application routes
+/*
+ * Author: Will Southard
+ * Course: WEB 450 - Mastering the MEAN Stack
+ * Assignment: Week 4 Major Development Task
+ * Task: M-106 - Customer Feedback By Year Report
+ * Date: June 28, 2026
+ *
+ * Description:
+ * This file was updated to support the customer feedback by year report component.
  */
 
 // Import the necessary modules
@@ -24,6 +28,7 @@ import { AgentPerformanceComponent } from './reports/agent-performance/agent-per
 import { CallDurationByDateRangeComponent } from './reports/agent-performance/call-duration-by-date-range/call-duration-by-date-range.component';
 import { PerformanceByMonthComponent } from './reports/agent-performance/performance-by-month/performance-by-month.component';
 import { ChannelRatingByMonthComponent } from './reports/customer-feedback/channel-rating-by-month/channel-rating-by-month.component';
+import { FeedbackByYearComponent } from './reports/customer-feedback/feedback-by-year/feedback-by-year.component';
 import { CustomerFeedbackComponent } from './reports/customer-feedback/customer-feedback.component';
 import { SalesByRegionTabularComponent } from './reports/sales/sales-by-region-tabular/sales-by-region-tabular.component';
 import { MonthlySalesComponent } from './reports/sales/monthly-sales/monthly-sales.component';
@@ -82,6 +87,10 @@ export const customerFeedbackRoutes: Routes = [
   {
     path: 'channel-rating-by-month',
     component: ChannelRatingByMonthComponent
+  },
+  {
+    path: 'feedback-by-year',
+    component: FeedbackByYearComponent
   }
 ];
 
